@@ -23,12 +23,9 @@ jobs:
         run: pip install -r scripts/requirements.txt
 
       - name: Fetch latest publications from Google Scholar
-        id: fetch
         run: python scripts/fetch_scholar.py
-        continue-on-error: true
 
       - name: Commit updated publications.json
-        if: steps.fetch.outcome == 'success'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

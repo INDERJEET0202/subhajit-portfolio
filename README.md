@@ -59,9 +59,10 @@ The scraper needs permission to push its own commits:
    Google Scholar publications" → Run workflow**.
 
 Note: Google Scholar has no official API and occasionally rate-limits
-scrapers. The workflow is written to fail soft — if a run gets blocked, it
-simply leaves the existing `data/publications.json` alone and tries again
-on the next scheduled run, so the site never breaks.
+scrapers. If a run gets blocked, the workflow fails (so GitHub emails you)
+but the site is unaffected — `data/publications.json` keeps its last good
+contents and the next scheduled run retries. An occasional red run is
+normal; a run failing every day means something actually needs fixing.
 
 ## 4. Updating the profile photo
 
