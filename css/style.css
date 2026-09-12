@@ -169,6 +169,24 @@ ul { margin: 0; padding: 0; list-style: none; }
 .btn-ghost { border-color: rgba(255,255,255,0.4); color: #fff; }
 .btn-ghost:hover { background: rgba(255,255,255,0.1); }
 
+/* For light backgrounds — btn-ghost is white-on-white there */
+.btn-dark {
+  background: var(--navy-900);
+  border-color: var(--navy-900);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 6px 16px rgba(16, 26, 44, 0.18);
+}
+.btn-dark:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1b1200;
+  box-shadow: 0 10px 22px rgba(201, 138, 59, 0.32);
+}
+.btn-dark svg { width: 16px; height: 16px; }
+
 .hero-links {
   display: flex;
   gap: 20px;
