@@ -66,11 +66,19 @@ ul { margin: 0; padding: 0; list-style: none; }
   height: 68px;
 }
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: var(--navy-900);
+}
+.brand-logo { height: 44px; width: auto; }
+.brand-mark {
   font-family: var(--font-head);
   font-weight: 700;
   font-size: 1.4rem;
-  text-decoration: none;
-  color: var(--navy-900);
+  padding-left: 14px;
+  border-left: 1px solid var(--line);
 }
 .brand-dot { color: var(--accent); }
 
@@ -415,6 +423,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 
 @media (max-width: 720px) {
+  .brand-logo { height: 28px; }
+  .brand-mark { font-size: 1.15rem; padding-left: 10px; }
+  .brand { gap: 10px; }
   .nav-toggle { display: flex; }
   .main-nav ul {
     position: absolute;
