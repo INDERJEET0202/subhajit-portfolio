@@ -63,20 +63,20 @@ scrapers. The workflow is written to fail soft — if a run gets blocked, it
 simply leaves the existing `data/publications.json` alone and tries again
 on the next scheduled run, so the site never breaks.
 
-## 4. Replace the placeholder images
+## 4. Updating the profile photo
 
-`assets/img/profile-placeholder.svg` is a placeholder — the real photo from
-your old Google Sites page couldn't be downloaded directly (Google serves
-those under short-lived, session-locked URLs that return 403 outside the
-page itself). To use your real photo:
+`assets/img/profile.jpg` is the current photo (auto-contrast + sharpened
+from the original with `scripts/enhance_photo.py`, since the original was a
+little washed out). To swap in a different photo later:
 
-1. Drop your photo in as `assets/img/profile.jpg` (a square-ish crop works
-   best, ~600×600px+).
-2. In `index.html`, find:
-   ```html
-   <img src="assets/img/profile-placeholder.svg" alt="" width="320" height="320">
+1. Replace `assets/img/profile.jpg` with your new image (a square-ish crop
+   works best, ~600×600px+ — it's shown in a circular frame with
+   `object-fit: cover`, so it gets center-cropped automatically).
+2. Optional: run it through the same enhancement pass —
+   ```bash
+   pip install Pillow
+   python3 scripts/enhance_photo.py path/to/new-photo.jpg profile.jpg
    ```
-   and change the `src` to `assets/img/profile.jpg`.
 
 ## 5. Point the CV button at your real file
 
