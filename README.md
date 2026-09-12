@@ -1,103 +1,321 @@
-# Subhajit Chattopadhyay — Portfolio
+# Subhajit Chattopadhyay — Academic Portfolio
 
-A static academic portfolio site (plain HTML/CSS/JS, no build step) with a
-Google Scholar publications feed that updates itself automatically.
+Personal research portfolio for Subhajit Chattopadhyay, Research Scholar in the
+School of Mechanical Sciences at IIT Bhubaneswar.
 
-## Structure
+**Live site:** https://inderjeet0202.github.io/subhajit-portfolio/
+**Repository:** https://github.com/INDERJEET0202/subhajit-portfolio
+**Google Scholar:** https://scholar.google.com/citations?user=OPXCrBcAAAAJ&hl=en
+
+Plain HTML/CSS/JS — no framework, no build step. The publications list keeps
+itself up to date from Google Scholar, so no manual editing is needed when a
+new paper is published.
+
+---
+
+## Contents
+
+- [How it works](#how-it-works)
+- [Project structure](#project-structure)
+- [Local preview](#local-preview)
+- [Setup: hosting](#setup-hosting)
+- [Setup: the Scholar auto-sync](#setup-the-scholar-auto-sync)
+- [Secrets handling](#secrets-handling)
+- [Editing content](#editing-content)
+- [Maintenance notes](#maintenance-notes)
+- [Design decisions and why](#design-decisions-and-why)
+- [Troubleshooting](#troubleshooting)
+- [Open TODOs](#open-todos)
+
+---
+
+## How it works
+
+Two independent systems. This separation matters — confusing them causes
+most of the confusion about "will it still auto-update if I change hosts?"
 
 ```
-index.html                       Single-page site (Home/About/Research/Publications/Achievements/Contact)
-css/style.css                    All styling
-js/main.js                       Renders publications + stats from data/publications.json
-data/publications.json           Publications data — overwritten daily by the sync job
-assets/img/                      Images (currently placeholder avatar + favicon, see below)
-scripts/fetch_scholar.py         Scraper that rebuilds data/publications.json from Google Scholar
-scripts/requirements.txt         Python deps for the scraper
-.github/workflows/update-publications.yml   Scheduled GitHub Action that runs the scraper daily
+        ┌──────────────────────── daily, 03:17 UTC ────────────────────────┐
+        │                                                                  │
+   GitHub Actions ──► SerpApi ──► Google Scholar profile                   │
+        │                              │                                   │
+        │              publications + citation counts                      │
+        ▼                                                                  │
+   data/publications.json  ──git commit + push──►  repo (main branch)      │
+                                                        │                  │
+                                                        ▼                  │
+                                              GitHub Pages redeploys       │
+                                                        │                  │
+                                                        ▼                  │
+                                    Live site fetches the JSON at page load
 ```
 
-## 1. Preview locally
+1. **GitHub Actions** runs the scraper on a daily cron, on GitHub's servers.
+2. It writes `data/publications.json` and commits it if anything changed.
+3. **GitHub Pages** serves the repo; a new commit triggers a redeploy.
+4. **The browser** fetches that JSON at page load and renders the list plus
+   the publications/citations counters.
 
-No build tools needed — any static file server works, e.g.:
+**The host and the sync are unrelated.** The sync runs on GitHub Actions
+regardless of who serves the site. Moving to Vercel or Netlify would change
+step 3 only — the sync keeps working identically.
+
+---
+
+## Project structure
+
+```
+index.html                    Single-page site (Hero/About/Research/Publications/Achievements/Contact)
+css/style.css                 All styling — design tokens at the top under :root
+js/main.js                    Mobile nav + renders publications/stats from the JSON
+data/publications.json        Publication data — rewritten by the daily sync
+assets/img/profile.jpg        Profile photo (contrast/sharpness enhanced)
+assets/img/iitbbs-logo.png    IIT Bhubaneswar logo in the pinned header
+assets/img/favicon.svg        Tab icon (SC monogram)
+scripts/fetch_scholar.py      Fetches Scholar data via SerpApi → publications.json
+scripts/enhance_photo.py      One-off photo enhancement helper
+scripts/requirements.txt      Python deps (just `requests`)
+.github/workflows/update-publications.yml   The daily sync job
+.env                          SERPAPI_KEY — git-ignored, never committed
+.env.example                  Template for the above
+.nojekyll                     Stops GitHub Pages running Jekyll over the files
+```
+
+---
+
+## Local preview
+
+No build tools required:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Then open http://localhost:8000.
+Open http://localhost:8000. Edit any file and refresh — that's the whole loop.
 
-## 2. Put it on GitHub Pages
+To run the sync locally:
 
-1. Create a new **public** repo on GitHub (e.g. `subhajit-portfolio`).
-2. From this folder:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial portfolio MVP"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/<repo-name>.git
-   git push -u origin main
-   ```
-3. On GitHub: **Settings → Pages → Build and deployment → Source: Deploy from a branch**,
-   branch `main`, folder `/ (root)`. Save.
-4. Your site goes live at `https://<your-username>.github.io/<repo-name>/`
-   within a minute or two. Every future push to `main` redeploys automatically.
+```bash
+python3 -m pip install -r scripts/requirements.txt
+cp .env.example .env      # then paste your real key into .env
+set -a && . ./.env && set +a
+python3 scripts/fetch_scholar.py
+```
 
-## 3. Turn on the automatic Google Scholar sync
+---
 
-Two one-time settings are needed:
+## Setup: hosting
 
-1. **Settings → Actions → General → Workflow permissions** → select
-   **"Read and write permissions"** → Save. (Lets the job push its commits.)
-2. **Settings → Secrets and variables → Actions → New repository secret**
-   → name `SERPAPI_KEY`, value = your key from
-   [serpapi.com/manage-api-key](https://serpapi.com/manage-api-key).
+Currently on **GitHub Pages**, configured as:
 
-Then the workflow in `.github/workflows/update-publications.yml` runs every
-day at 03:17 UTC, reads
-[the Scholar profile](https://scholar.google.com/citations?user=OPXCrBcAAAAJ&hl=en),
-and commits `data/publications.json` when anything changes (new paper, new
-citation count). The site reads that file at load time, so a new paper
-appears on the live site the next day with no manual edits.
+- **Settings → Pages → Source:** Deploy from a branch
+- **Branch:** `main`, folder `/ (root)`
+- Enforce HTTPS: on
 
-To trigger it immediately: **Actions tab → "Sync Google Scholar
-publications" → Run workflow**.
+Every push to `main` redeploys automatically, usually within a minute.
 
-### Why SerpApi instead of scraping directly
+### Moving to Vercel later
 
-Google Scholar has no official API and blocks datacenter IPs. Scraping it
-with `scholarly` works from a laptop but always fails from GitHub Actions
-runners. SerpApi fetches the same profile from its own infrastructure. The
-free tier is 250 searches/month; a daily sync uses about 30.
+No code changes needed — it's a static site. Import the repo at
+vercel.com/new, then **override the auto-detection**:
 
-If a run does fail, the site is unaffected — `data/publications.json` keeps
-its last good contents and the next run retries. The workflow fails loudly
-(no `continue-on-error`) so GitHub emails you rather than hiding it.
+- **Framework Preset:** Other
+- **Root Directory:** `./`
+- **Build Command:** leave empty
+- **Output Directory:** `./`
 
-## 4. Updating the profile photo
+Vercel's auto-detect sees `scripts/requirements.txt` and wrongly guesses this
+is a Python project named "scripts". If you accept that guess, the deploy
+fails or serves nothing. The overrides above are the fix.
 
-`assets/img/profile.jpg` is the current photo (auto-contrast + sharpened
-from the original with `scripts/enhance_photo.py`, since the original was a
-little washed out). To swap in a different photo later:
+---
 
-1. Replace `assets/img/profile.jpg` with your new image (a square-ish crop
-   works best, ~600×600px+ — it's shown in a circular frame with
-   `object-fit: cover`, so it gets center-cropped automatically).
-2. Optional: run it through the same enhancement pass —
-   ```bash
-   pip install Pillow
-   python3 scripts/enhance_photo.py path/to/new-photo.jpg profile.jpg
-   ```
+## Setup: the Scholar auto-sync
 
-## 5. Point the CV button at your real file
+Two one-time settings on the repository:
 
-In `index.html`, the "Download CV" button (`id="cvLink"`) currently points
-to a placeholder Google Drive link. Replace `href="..."` with your actual
-CV link (Drive share link, or a PDF you add under `assets/`).
+### 1. Let the workflow push its commits
 
-## 6. Moving to Vercel later
+**Settings → Actions → General → Workflow permissions**
+→ select **"Read and write permissions"** → Save.
 
-No changes needed — Vercel (and Netlify) both auto-detect a static site
-with no framework. Just "Import Project" from the same GitHub repo; the
-GitHub Action keeps committing fresh publication data to `main` either way,
-and Vercel redeploys on every push just like Pages does.
+Without this the job runs but the final `git push` fails with a 403.
+
+### 2. Add the SerpApi key as a secret
+
+**Settings → Secrets and variables → Actions → New repository secret**
+
+- **Name:** `SERPAPI_KEY` (exact — the workflow looks for this name)
+- **Value:** your key from https://serpapi.com/manage-api-key
+
+### Running it
+
+- **Automatically:** daily at 03:17 UTC.
+- **Manually:** Actions tab → "Sync Google Scholar publications" → Run workflow.
+
+A run that ends with `No changes to publications.json` is a success — it means
+Scholar had nothing new since last time.
+
+---
+
+## Secrets handling
+
+The SerpApi key lives in two places, and **neither is the git repo**:
+
+| Where | Used by | Notes |
+|---|---|---|
+| `.env` (local) | Running the script on your machine | Git-ignored via `.gitignore` |
+| GitHub repository secret | The daily Actions run | Encrypted; masked in logs |
+
+Rules:
+
+- **Never commit the key.** `.gitignore` blocks `.env` and `.env.*`. This repo
+  is public — a committed key is a leaked key, and rewriting git history does
+  not reliably un-leak it.
+- **Don't paste keys into chat or issues.** Put them straight into the GitHub
+  secret field, which is the only place the workflow reads from.
+- **Rotate if exposed.** Regenerate at https://serpapi.com/manage-api-key,
+  then update both the GitHub secret and your local `.env`.
+
+To verify nothing secret is staged before a commit:
+
+```bash
+git diff --cached --name-only     # .env must not appear
+git check-ignore -v .env          # should print the matching .gitignore rule
+```
+
+---
+
+## Editing content
+
+Most content is plain HTML in `index.html` — edit the text directly.
+
+| To change | Where |
+|---|---|
+| Bio / intro paragraph | `index.html`, `.hero-lede` and the About section |
+| Academic background | `index.html`, the `.timeline` list |
+| Research focus cards | `index.html`, the `.cards-grid` section |
+| Achievements | `index.html`, the `.achievements-list` |
+| Contact links | `index.html`, the `.contact-list` |
+| Colours / fonts | `css/style.css`, the `:root` block at the top |
+| Publications | Don't edit — it's overwritten by the sync |
+
+### Profile photo
+
+Replace `assets/img/profile.jpg`. It renders in a circular frame with
+`object-fit: cover`, so a square-ish crop works best (600×600px or larger).
+
+Optionally run it through the same enhancement pass used on the current one
+(auto-contrast, mild sharpening — the original was washed out):
+
+```bash
+python3 -m pip install Pillow
+python3 scripts/enhance_photo.py path/to/new-photo.jpg profile.jpg
+```
+
+### CV link
+
+The "Download CV (PDF)" button in the Achievements section is `id="cvLink"`
+in `index.html`. Point its `href` at a real file — either a Google Drive
+share link, or a PDF committed into `assets/` and linked as
+`assets/Subhajit_CV.pdf` (more reliable, since Drive links break if sharing
+permissions change).
+
+---
+
+## Maintenance notes
+
+Things that could need attention someday, roughly in order of likelihood:
+
+- **SerpApi free tier: 250 searches/month.** A daily sync uses about 30, so
+  there's plenty of headroom. If the tier changes or the quota is exceeded,
+  runs fail and the site keeps serving the last good data.
+- **GitHub disables cron workflows after 60 days of repository inactivity**
+  (it emails first). The sync commits a fresh `last_updated` timestamp on
+  every successful run, which counts as activity and keeps the clock reset —
+  so this should not trigger in practice. If it ever does, click
+  "Enable workflow" in the Actions tab.
+- **Failures are loud on purpose.** The workflow has no `continue-on-error`,
+  so a broken sync turns the run red and GitHub emails you. An occasional red
+  run is fine; a run failing every day means something needs fixing.
+- **A failed sync never breaks the site.** `data/publications.json` keeps its
+  last good contents, so the page renders normally with slightly stale data.
+
+---
+
+## Design decisions and why
+
+Recording these because each one was a dead end that cost time.
+
+### SerpApi instead of scraping Scholar directly
+
+The first version used the `scholarly` Python package to scrape Scholar
+directly. It worked perfectly from a laptop and **failed 100% of the time on
+GitHub Actions.** Google blocks datacenter IP ranges for Scholar, and Actions
+runners are datacenter IPs.
+
+There is no free way around this from CI — the blocking is deliberate.
+SerpApi fetches the same profile from its own infrastructure and handles the
+blocking, which is what makes unattended daily syncing possible at all.
+
+Dropping `scholarly` also removed a large fragile dependency tree (selenium,
+sphinx, bibtexparser). The sync now needs only `requests`.
+
+### Not OpenAlex, despite it being free and key-less
+
+OpenAlex was evaluated as a no-signup alternative. Its author disambiguation
+merges **four different people** named Subhajit Chattopadhyay into one profile
+(`A5004286784`): the correct materials-engineering papers, plus a
+statistician's arXiv copula papers, some SSRN economics papers, and a medical
+paper in *Folia Medica*. Publishing other people's work on an academic
+portfolio is worse than stale data, so this was rejected.
+
+Google Scholar remains the right source precisely because it is manually
+curated and correct.
+
+### Publication links point to Scholar, not DOIs
+
+SerpApi's author endpoint returns Scholar's per-citation page as each paper's
+link. Resolving real publisher DOIs would require one extra API call per
+paper per sync, which multiplies quota use and adds failure modes. The Scholar
+page lists the publisher link, so it's one extra click.
+
+### Single page instead of four
+
+The original Google Sites version had Home/About/Achievement/Publications as
+separate pages. This is one scrolling page with anchor navigation — fewer
+files, no cross-page nav state, and it reads better on mobile.
+
+---
+
+## Troubleshooting
+
+**Sync fails with `No module named 'bibtexparser.bibdatabase'`**
+Historical — from the old `scholarly` implementation, which is gone. If you
+ever reintroduce `scholarly`, pin `bibtexparser<2`; v2 removed that module and
+`scholarly` declares no upper bound.
+
+**Sync fails at the fetch step with a blocking/CAPTCHA error**
+The `SERPAPI_KEY` secret is missing, wrong, or out of quota. Check
+Settings → Secrets, and your usage at serpapi.com.
+
+**Sync fails at the commit step with 403**
+Workflow permissions are read-only. Settings → Actions → General →
+Workflow permissions → "Read and write permissions".
+
+**Site shows old data after a successful sync**
+Pages redeploy takes a minute or two. Also hard-refresh (Cmd+Shift+R) — the
+JSON is fetched with `cache: 'no-store'`, but the browser may still hold the
+old HTML.
+
+**Site is completely unstyled or 404s**
+Check that `.nojekyll` still exists at the repo root. Without it, Pages runs
+Jekyll, which can skip files.
+
+---
+
+## Open TODOs
+
+- [ ] Point the CV button at a real PDF (currently a placeholder Drive URL)
+- [ ] Verify the SerpApi sync succeeds in CI (needs the `SERPAPI_KEY` secret)
+- [ ] Rotate the SerpApi key if it was ever shared outside the secret store
