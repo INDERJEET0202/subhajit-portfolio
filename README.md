@@ -45,24 +45,34 @@ Then open http://localhost:8000.
 
 ## 3. Turn on the automatic Google Scholar sync
 
-The scraper needs permission to push its own commits:
+Two one-time settings are needed:
 
 1. **Settings → Actions → General → Workflow permissions** → select
-   **"Read and write permissions"** → Save.
-2. That's it — the workflow in `.github/workflows/update-publications.yml`
-   runs every day at 03:17 UTC, re-scrapes
-   [your Scholar profile](https://scholar.google.com/citations?user=OPXCrBcAAAAJ&hl=en),
-   and commits `data/publications.json` if anything changed (new paper, new
-   citation count, etc). The site reads that file at load time, so a new
-   paper shows up on the live site the next day with zero manual edits.
-3. To trigger it immediately instead of waiting: **Actions tab → "Sync
-   Google Scholar publications" → Run workflow**.
+   **"Read and write permissions"** → Save. (Lets the job push its commits.)
+2. **Settings → Secrets and variables → Actions → New repository secret**
+   → name `SERPAPI_KEY`, value = your key from
+   [serpapi.com/manage-api-key](https://serpapi.com/manage-api-key).
 
-Note: Google Scholar has no official API and occasionally rate-limits
-scrapers. If a run gets blocked, the workflow fails (so GitHub emails you)
-but the site is unaffected — `data/publications.json` keeps its last good
-contents and the next scheduled run retries. An occasional red run is
-normal; a run failing every day means something actually needs fixing.
+Then the workflow in `.github/workflows/update-publications.yml` runs every
+day at 03:17 UTC, reads
+[the Scholar profile](https://scholar.google.com/citations?user=OPXCrBcAAAAJ&hl=en),
+and commits `data/publications.json` when anything changes (new paper, new
+citation count). The site reads that file at load time, so a new paper
+appears on the live site the next day with no manual edits.
+
+To trigger it immediately: **Actions tab → "Sync Google Scholar
+publications" → Run workflow**.
+
+### Why SerpApi instead of scraping directly
+
+Google Scholar has no official API and blocks datacenter IPs. Scraping it
+with `scholarly` works from a laptop but always fails from GitHub Actions
+runners. SerpApi fetches the same profile from its own infrastructure. The
+free tier is 250 searches/month; a daily sync uses about 30.
+
+If a run does fail, the site is unaffected — `data/publications.json` keeps
+its last good contents and the next run retries. The workflow fails loudly
+(no `continue-on-error`) so GitHub emails you rather than hiding it.
 
 ## 4. Updating the profile photo
 

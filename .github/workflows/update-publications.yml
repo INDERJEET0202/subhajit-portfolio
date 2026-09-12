@@ -23,6 +23,8 @@ jobs:
         run: pip install -r scripts/requirements.txt
 
       - name: Fetch latest publications from Google Scholar
+        env:
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
         run: python scripts/fetch_scholar.py
 
       - name: Commit updated publications.json

@@ -1,86 +1,99 @@
 #!/usr/bin/env python3
 """Fetch this profile's Google Scholar publications and write data/publications.json.
 
-Run manually:
-    pip install -r scripts/requirements.txt
+Uses SerpApi's Google Scholar Author API rather than scraping Scholar directly:
+Google blocks datacenter IPs, so a direct scrape works from a laptop but always
+fails from GitHub Actions runners.
+
+Needs a SerpApi key (free tier is 250 searches/month; a daily sync uses ~30):
+    export SERPAPI_KEY=...
     python scripts/fetch_scholar.py
 
-Run automatically by .github/workflows/update-publications.yml on a daily schedule.
-Designed to fail soft: if Google Scholar rate-limits or blocks the request, the
-existing data/publications.json is left untouched and the script exits non-zero
-so the workflow can just retry on the next scheduled run.
+In CI the key comes from the SERPAPI_KEY repository secret.
 """
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import requests
+
 SCHOLAR_ID = "OPXCrBcAAAAJ"
+API_URL = "https://serpapi.com/search.json"
 OUTPUT_PATH = Path(__file__).resolve().parent.parent / "data" / "publications.json"
 
 
-def fetch_profile():
-    from scholarly import scholarly
+def fetch_profile(api_key: str) -> dict:
+    response = requests.get(
+        API_URL,
+        params={
+            "engine": "google_scholar_author",
+            "author_id": SCHOLAR_ID,
+            "api_key": api_key,
+            "num": 100,
+            "sort": "pubdate",
+        },
+        timeout=60,
+    )
+    response.raise_for_status()
+    payload = response.json()
+    if payload.get("error"):
+        raise RuntimeError(payload["error"])
+    return payload
 
-    search_query = scholarly.search_author_id(SCHOLAR_ID)
-    author = scholarly.fill(search_query, sections=["basics", "indices", "publications"])
-    return author
+
+def total_citations(payload: dict):
+    for row in payload.get("cited_by", {}).get("table", []):
+        if "citations" in row:
+            return row["citations"].get("all")
+    return None
 
 
-def normalize(author) -> dict:
-    from scholarly import scholarly
-
+def normalize(payload: dict) -> dict:
     publications = []
-    for pub in author.get("publications", []):
-        # The author-level listing only has title/year/citation string;
-        # fetching each publication's own page gets authors + a real link.
-        try:
-            pub = scholarly.fill(pub)
-        except Exception as exc:  # noqa: BLE001 - keep the partial record rather than dropping the paper
-            print(f"[fetch_scholar] Could not fully fetch '{pub.get('bib', {}).get('title')}': {exc}", file=sys.stderr)
-
-        bib = pub.get("bib", {})
-        pub_url = pub.get("pub_url")
-        year = bib.get("pub_year")
+    for article in payload.get("articles", []):
+        year = article.get("year")
         try:
             year = int(year)
         except (TypeError, ValueError):
             year = None
 
-        venue_parts = [bib.get("journal"), bib.get("volume"), bib.get("number")]
-        venue = ", ".join(p for p in venue_parts if p) or bib.get("citation") or ""
-
         publications.append({
-            "title": bib.get("title"),
-            "authors": bib.get("author"),
-            "venue": venue,
+            "title": article.get("title"),
+            "authors": article.get("authors"),
+            "venue": article.get("publication") or "",
             "year": year,
-            "citations": pub.get("num_citations", 0),
-            "link": pub_url if isinstance(pub_url, str) and pub_url.startswith("http") else None,
+            "citations": (article.get("cited_by") or {}).get("value") or 0,
+            "link": article.get("link"),
         })
 
-    # Newest / most-cited first, unknown years last
     publications.sort(key=lambda p: (p["year"] is None, -(p["year"] or 0)))
 
+    author = payload.get("author", {})
     return {
         "scholar_id": SCHOLAR_ID,
         "name": author.get("name"),
-        "affiliation": author.get("affiliation"),
-        "total_citations": author.get("citedby"),
-        "h_index": author.get("hindex"),
+        "affiliation": author.get("affiliations"),
+        "total_citations": total_citations(payload),
         "last_updated": datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "publications": publications,
     }
 
 
 def main():
+    api_key = os.environ.get("SERPAPI_KEY")
+    if not api_key:
+        print("[fetch_scholar] SERPAPI_KEY is not set.", file=sys.stderr)
+        sys.exit(1)
+
     try:
-        author = fetch_profile()
-    except Exception as exc:  # noqa: BLE001 - fail soft, keep existing data on any scraper error
+        payload = fetch_profile(api_key)
+    except Exception as exc:  # noqa: BLE001 - any failure should leave existing data alone
         print(f"[fetch_scholar] Failed to fetch Scholar profile: {exc}", file=sys.stderr)
         sys.exit(1)
 
-    data = normalize(author)
+    data = normalize(payload)
     if not data["publications"]:
         print("[fetch_scholar] No publications parsed, refusing to overwrite existing data.", file=sys.stderr)
         sys.exit(1)

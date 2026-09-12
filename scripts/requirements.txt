@@ -1,4 +1,1 @@
-scholarly==1.7.11
-# scholarly 1.7.x imports bibtexparser.bibdatabase, which v2 removed.
-# scholarly declares no upper bound, so this pin is required.
-bibtexparser<2
+requests>=2.31,<3
