@@ -2,3 +2,8 @@
 __pycache__/
 *.pyc
 .venv/
+
+# Secrets — never commit. This repo is public.
+.env
+.env.*
+!.env.example

@@ -3,56 +3,55 @@
   "name": "Subhajit Chattopadhyay",
   "affiliation": "Research Scholar, Indian Institute of Technology Bhubaneswar",
   "total_citations": 42,
-  "h_index": 2,
-  "last_updated": "2026-09-12T07:41:59Z",
+  "last_updated": "2026-09-12T08:29:02Z",
   "publications": [
     {
       "title": "Morphology and properties of aluminium alloy matrix hybrid nanocomposites reinforced with nano-SiC and eggshell particles",
-      "authors": "Subhajit Chattopadhyay and Subrata Mondal and Debi Prasad Mishra",
-      "venue": "Journal of Materials Engineering and Performance, 34, 19",
+      "authors": "S Chattopadhyay, S Mondal, DP Mishra",
+      "venue": "Journal of Materials Engineering and Performance 34 (19), 22234-22249, 2025",
       "year": 2025,
       "citations": 6,
-      "link": "https://link.springer.com/article/10.1007/s11665-025-10813-6"
-    },
-    {
-      "title": "Advancements and challenges in additive manufacturing: a comprehensive review",
-      "authors": "Subhajit Chattopadhyay and Stephen Dilip Mohapatra and Nirmal Kumar Mandal",
-      "venue": "Engineering Research Express, 6, 1",
-      "year": 2024,
-      "citations": 35,
-      "link": "https://iopscience.iop.org/article/10.1088/2631-8695/ad30b1/meta"
-    },
-    {
-      "title": "Tribology of Mg-B4C nanocomposites fabricated following powder metallurgy route",
-      "authors": "Samrat Hazra and Subhajit Chattopadhyay and Soumyabrata Chakravarty and Nirmal kumar Mandal",
-      "venue": "Engineering Research Express, 6, 3",
-      "year": 2024,
-      "citations": 1,
-      "link": "https://iopscience.iop.org/article/10.1088/2631-8695/ad652f/meta"
+      "link": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=OPXCrBcAAAAJ&pagesize=100&sortby=pubdate&citation_for_view=OPXCrBcAAAAJ:UeHWp8X0CEIC"
     },
     {
       "title": "Slicing on the Tessellated Model for the 3D Printing Process based on the Variable Thickness Layers",
-      "authors": "Samrat Hazra and Gourab Ganguly and Subhajit Chattopadhyay",
-      "venue": "Journal of Manufacturing Engineering, 19, 3",
+      "authors": "S Hazra, G Ganguly, S Chattopadhyay",
+      "venue": "Journal of Manufacturing Engineering 19 (3), 082-088, 2024",
       "year": 2024,
       "citations": 0,
-      "link": "https://smenec.org/index.php/1/article/view/699"
+      "link": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=OPXCrBcAAAAJ&pagesize=100&sortby=pubdate&citation_for_view=OPXCrBcAAAAJ:qjMakFHDy7sC"
+    },
+    {
+      "title": "Tribology of Mg-B4C nanocomposites fabricated following powder metallurgy route",
+      "authors": "S Hazra, S Chattopadhyay, S Chakravarty, N kumar Mandal",
+      "venue": "Engineering Research Express 6 (3), 035525, 2024",
+      "year": 2024,
+      "citations": 1,
+      "link": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=OPXCrBcAAAAJ&pagesize=100&sortby=pubdate&citation_for_view=OPXCrBcAAAAJ:2osOgNQ5qMEC"
+    },
+    {
+      "title": "Advancements and challenges in additive manufacturing: a comprehensive review",
+      "authors": "S Chattopadhyay, SD Mohapatra, NK Mandal",
+      "venue": "Engineering Research Express 6 (1), 2024",
+      "year": 2024,
+      "citations": 35,
+      "link": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=OPXCrBcAAAAJ&pagesize=100&sortby=pubdate&citation_for_view=OPXCrBcAAAAJ:d1gkVwhDpl0C"
     },
     {
       "title": "Optimizing Microstructure for Enhanced Mechanical Properties of Al2O3 - Reinforced Aluminum Matrix Composites Using Powder Metallurgy.",
-      "authors": "Subhajit Chattopadhyay and Samrat Hazra",
-      "venue": "IUP Journal of Mechanical Engineering, 16, 4",
+      "authors": "S Chattopadhyay, S Hazra",
+      "venue": "IUP Journal of Mechanical Engineering 16 (4), 7, 2023",
       "year": 2023,
       "citations": 0,
-      "link": "https://openurl.ebsco.com/contentitem/gcd:174725606?sid=ebsco:plink:crawler-gcd&id=ebsco:gcd:174725606&crl=c&jrnl=09746536"
+      "link": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=OPXCrBcAAAAJ&pagesize=100&sortby=pubdate&citation_for_view=OPXCrBcAAAAJ:u-x6o8ySG0sC"
     },
     {
       "title": "Drilling Performance and Multi-Resolution Vibration Analysis of GFRP",
-      "authors": "Arpan Maity and Rayapati Subbarao and Nirmal Kumar Mandal and Arghya Chattopadhyay and Subhajit Chattopadhyay",
-      "venue": "IUP Journal of Mechanical Engineering, 16, 3",
+      "authors": "A Maity, R Subbarao, NK Mandal, A Chattopadhyay, S Chattopadhyay",
+      "venue": "IUP Journal of Mechanical Engineering 16 (3), 49-67, 2023",
       "year": 2023,
       "citations": 0,
-      "link": "https://search.proquest.com/openview/0008402ce6b456ae31fe2f98305dc6ce/1?pq-origsite=gscholar&cbl=2029991"
+      "link": "https://scholar.google.com/citations?view_op=view_citation&hl=en&user=OPXCrBcAAAAJ&pagesize=100&sortby=pubdate&citation_for_view=OPXCrBcAAAAJ:u5HHmVD_uO8C"
     }
   ]
 }
