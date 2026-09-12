@@ -66,18 +66,6 @@ function renderStats(data) {
 
   document.getElementById('statPapers').textContent = totalPapers || '—';
   document.getElementById('statCitations').textContent = totalCitations || '—';
-  document.getElementById('statHindex').textContent = data.h_index ?? '—';
-  document.getElementById('statUpdated').textContent = data.last_updated
-    ? formatDate(data.last_updated)
-    : '—';
-}
-
-function formatDate(iso) {
-  try {
-    return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-  } catch {
-    return iso;
-  }
 }
 
 function escapeHtml(str) {

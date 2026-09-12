@@ -206,7 +206,9 @@ ul { margin: 0; padding: 0; list-style: none; }
 }
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 420px;
+  margin: 0 auto;
   padding: 26px 24px;
   gap: 16px;
   text-align: center;
@@ -392,7 +394,6 @@ ul { margin: 0; padding: 0; list-style: none; }
   .portrait-frame { width: 160px; height: 160px; }
   .about-grid { grid-template-columns: 1fr; }
   .contact-grid { grid-template-columns: 1fr; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 720px) {
