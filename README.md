@@ -328,6 +328,7 @@ Jekyll, which can skip files.
 
 ## Open TODOs
 
-- [ ] Point the CV button at a real PDF (currently a placeholder Drive URL)
-- [ ] Verify the SerpApi sync succeeds in CI (needs the `SERPAPI_KEY` secret)
+- [x] Point the CV button at a real PDF — now `assets/resume/Subhajit_CV.pdf`
+- [ ] Confirm one full sync run pushes successfully (the SerpApi fetch already
+      succeeds in CI; the push was last blocked by a GitHub-wide outage)
 - [ ] Rotate the SerpApi key if it was ever shared outside the secret store
