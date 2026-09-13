@@ -299,9 +299,16 @@ ever reintroduce `scholarly`, pin `bibtexparser<2`; v2 removed that module and
 The `SERPAPI_KEY` secret is missing, wrong, or out of quota. Check
 Settings → Secrets, and your usage at serpapi.com.
 
-**Sync fails at the commit step with 403**
+**Sync fails at the commit step with 403 / "Permission denied"**
 Workflow permissions are read-only. Settings → Actions → General →
 Workflow permissions → "Read and write permissions".
+
+**Sync fails at the commit step with `remote: fatal error in commit_refs`**
+A GitHub-side transient error, not a configuration problem — the fetch
+succeeded and only the push was rejected. The commit step retries three
+times with a rebase in between, so this normally self-heals. If every
+attempt fails, just re-run the workflow; nothing is lost, since the next
+run re-fetches from scratch.
 
 **Site shows old data after a successful sync**
 Pages redeploy takes a minute or two. Also hard-refresh (Cmd+Shift+R) — the
