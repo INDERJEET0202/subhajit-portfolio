@@ -213,13 +213,18 @@ python3 -m pip install Pillow
 python3 scripts/enhance_photo.py path/to/new-photo.jpg profile.jpg
 ```
 
-### CV link
+### CV
 
-The "Download CV (PDF)" button in the Achievements section is `id="cvLink"`
-in `index.html`. Point its `href` at a real file — either a Google Drive
-share link, or a PDF committed into `assets/` and linked as
-`assets/Subhajit_CV.pdf` (more reliable, since Drive links break if sharing
-permissions change).
+The "Download CV (PDF)" button in the Achievements section (`id="cvLink"`)
+serves `assets/resume/Subhajit_CV.pdf` straight from the repo. To update it,
+replace that file and push — the filename and link stay the same.
+
+Note that this PDF is publicly downloadable and search-indexable, and it
+contains a phone number, date of birth, and three referees' email addresses.
+That was a deliberate choice. If you ever want those off the public web,
+replace the file with a redacted version — but be aware the original stays in
+git history, so a genuinely clean removal means rewriting history or
+publishing the redacted copy under a fresh filename in a new repo.
 
 ---
 
