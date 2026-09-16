@@ -15,7 +15,12 @@
 
 <a class="skip-link" href="#main">Skip to main content</a>
 
-<header class="site-header" id="top">
+<!-- Scroll anchor. Must not live on the sticky header: a stuck header sits at
+     viewport top permanently, so the browser treats it as already in view and
+     refuses to scroll. -->
+<span id="top"></span>
+
+<header class="site-header">
   <div class="container header-inner">
     <a class="brand" href="#top">
       <img class="brand-logo" src="assets/img/iitbbs-logo.png" alt="Indian Institute of Technology Bhubaneswar">

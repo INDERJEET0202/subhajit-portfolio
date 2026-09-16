@@ -16,6 +16,17 @@ if (navToggle && navList) {
 
 document.getElementById('year').textContent = new Date().getFullYear();
 
+// Scroll to top for the brand and "Back to top" links. Fragment navigation is
+// unreliable here: the target sits at document position 0 with no dimensions,
+// and browsers skip scrolling to a zero-size box.
+document.querySelectorAll('a[href="#top"]').forEach((link) => {
+  link.addEventListener('click', (event) => {
+    event.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    history.replaceState(null, '', location.pathname + location.search);
+  });
+});
+
 // Publications, fed by data/publications.json (kept fresh by the
 // scheduled GitHub Actions Google Scholar sync — see scripts/fetch_scholar.py)
 async function loadPublications() {
